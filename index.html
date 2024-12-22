@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Your Truth</title>
+    <style>
+        body {
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .teaser-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 3px solid #cc0000;
+        }
+        .header {
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+        .edit-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .edit-button:hover {
+            background: white;
+            color: #cc0000;
+        }
+        .edit-icon {
+            width: 16px;
+            height: 16px;
+        }
+        .save-button {
+            display: none;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            color: #cc0000;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+        }
+        .edit-mode .save-button {
+            display: block;
+        }
+        .edit-mode .edit-button {
+            display: none;
+        }
+        .quote {
+            font-style: italic;
+            font-size: 20px;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            line-height: 1.4;
+        }
+        .editable {
+            border: none;
+            background: none;
+            width: 100%;
+            color: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            text-align: center;
+            resize: none;
+            padding: 0;
+            margin: 0;
+            outline: none;
+        }
+        .edit-mode .editable {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            padding: 4px;
+        }
+        .attribution {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        .tabs {
+            display: flex;
+            background: #fff5f5;
+            border-bottom: 2px solid #cc0000;
+        }
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #666;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .tab:hover {
+            color: #cc0000;
+        }
+        .tab.active {
+            color: #cc0000;
+            border-bottom: 3px solid #cc0000;
+            margin-bottom: -2px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        .tab-content.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .meta-box {
+            background: #fff5f5;
+            border: 2px solid #cc0000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .meta-header {
+            background: #cc0000;
+            color: white;
+            padding: 10px;
+            font-family: monospace;
+        }
+        .meta-content {
+            padding: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .edit-mode .meta-content {
+            outline: none;
+            background: white;
+        }
+        .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            margin-top: 20px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: white;
+            width: 0%;
+            transition: width 0.5s linear;
+        }
+    </style>
+</head>
+<body>
+    <div class="teaser-container">
+        <div class="header">
+            <button class="edit-button">
+                <svg class="edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Edit
+            </button>
+            <button class="save-button">Save Changes</button>
+            <textarea class="editable quote" readonly>The best place to look for secrets is where no one else is looking. Most valuable secrets are hiding in plain sight.</textarea>
+            <div class="attribution editable" contenteditable="false">- Peter Thiel</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('concept')">The Concept</button>
+            <button class="tab" onclick="switchTab('secrets')">The Secrets</button>
+            <button class="tab" onclick="switchTab('insight')">The Insight</button>
+            <button class="tab" onclick="switchTab('opportunity')">The Opportunity</button>
+        </div>
+
+        <div class="content">
+            <div id="concept" class="tab-content visible">
+                <div class="meta-box">
+                    <div class="meta-header">&lt;meta thiel="concept"&gt;</div>
+                    <div class="meta-content" contenteditable="false">What is a Secret?
+
+Not what's unknown
+Not what's hidden
+Not what's complex
+
+But what's right in front of us
+Yet nobody sees
+Or nobody acts on
+
+These are the most valuable truths.</div>
+                    <div class="meta-header">&lt;/meta&gt;</div>
+                </div>
+            </div>
+
+            <div id="secrets" class="tab-content">
+                <div class="meta-box">
+                    <div class="meta-header">&lt;meta thiel="examples"&gt;</div>
+                    <div class="meta-content" contenteditable="false">Secrets hide in:
+→ Conventional wisdom
+→ Accepted limitations
+→ Common practices
+→ Daily frustrations
+→ "That's just how it is"
+
+The answer is often obvious
+Only after it's revealed</div>
+                    <div class="meta-header">&lt;/meta&gt;</div>
+                </div>
+            </div>
+
+            <div id="insight" class="tab-content">
+                <div class="meta-box">
+                    <div class="meta-header">&lt;meta thiel="thinking"&gt;</div>
+                    <div class="meta-content" contenteditable="false">Key Questions:
+
+→ What important truth do few people agree with?
+→ What valuable company is nobody building?
+→ What opportunities are hiding in plain sight?
+→ What problems do we accept as "normal"?
+
+The answers are there
+Waiting to be seen</div>
+                    <div class="meta-header">&lt;/meta&gt;</div>
+                </div>
+            </div>
+
+            <div id="opportunity" class="tab-content">
+                <div class="meta-box">
+                    <div class="meta-header">&lt;meta thiel="future"&gt;</div>
+                    <div class="meta-content" contenteditable="false">Finding Secrets:
+
+1. Look where others don't
+2. Question the obvious
+3. Challenge "impossible"
+4. Act on what you see
+
+The next big thing
+Is probably already here
+Hiding in plain sight</div>
+                    <div class="meta-header">&lt;/meta&gt;</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tabs = ['concept', 'secrets', 'insight', 'opportunity'];
+        let currentTab = 0;
+        let loopComplete = false;
+        const progressBar = document.getElementById('progress');
+        const editButton = document.querySelector('.edit-button');
+        const saveButton = document.querySelector('.save-button');
+        const container = document.querySelector('.teaser-container');
+        const editableElements = document.querySelectorAll('.editable, .meta-content');
+
+        function switchTab(tabId, isAuto = false) {
+            if (loopComplete || !isAuto) {
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('visible');
+                });
+                
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                document.getElementById(tabId).classList.add('visible');
+                document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            }
+        }
+
+        // Edit functionality
+        editButton.addEventListener('click', () => {
+            container.classList.add('edit-mode');
+            editableElements.forEach(element => {
+                if (element.tagName === 'TEXTAREA') {
+                    element.removeAttribute('readonly');
+                } else {
+                    element.setAttribute('contenteditable', 'true');
+                }
+            });
+        });
+
+        saveButton.addEventListener('click', () => {
+            container.classList.remove('edit-mode');
+            editableElements.forEach(element => {
+                if (element.tagName === 'TEXTAREA') {
+                    element.setAttribute('readonly', 'true');
+                } else {
+                    element.setAttribute('contenteditable', 'false');
+                }
+            });
+            // Here you could add code to save changes
+        });
+
+        // Auto-rotate tabs once
+        const interval = setInterval(() => {
+            currentTab++;
+            if (currentTab >= tabs.length) {
+                clearInterval(interval);
+                loopComplete = true;
+                return;
+            }
+            
+            progressBar.style.width = `${((currentTab + 1) / tabs.length) * 100}%`;
+            switchTab(tabs[currentTab], true);
+        }, 4000);
+    </script>
+</body>
+</html>
